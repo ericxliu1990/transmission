@@ -1,0 +1,113 @@
+{{- $fullName := include "transmission.fullname" . -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "transmission.fullname" . }}
+  labels:
+    {{- include "transmission.labels" . | nindent 4 }}
+spec:
+{{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+{{- end }}
+  selector:
+    matchLabels:
+      {{- include "transmission.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+    {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+      labels:
+        {{- include "transmission.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "transmission.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 9091
+              protocol: TCP
+        {{- if .Values.livenessProbe }}
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+        {{- end }}
+        {{- if .Values.readinessProbe }}
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+        {{- end }}
+          env:
+            - name: CREATE_TUN_DEVICE
+              value: {{ .Values.config.create_tun_device | quote }}
+            - name: OPENVPN_PROVIDER
+              value: {{ .Values.config.openvpn_provider | quote }}
+            - name: OPENVPN_USERNAME
+              value: {{ .Values.config.openvpn_provider | quote }}
+            - name: OPENVPN_PASSWORD
+              value: {{ .Values.config.openvpn_password | quote }}
+            - name: WEBPROXY_ENABLED
+              value: {{ .Values.config.webproxy_enabled | quote }}
+            - name: LOCAL_NETWORK
+              value: {{ .Values.config.local_network | quote }}
+            - name: TRANSMISSION_WEB_UI
+              value: {{ .Values.config.transmission_web_ui | quote }}
+            - name: HEALTH_CHECK_HOST
+              value: {{ .Values.config.health_check_host | quote }}
+            - name: NORDVPN_COUNTRY
+              value: {{ .Values.config.nordvpn_country | quote }}
+          {{- range .Values.env }}
+            - name: {{ .name }}
+              value: {{ .value }}
+          {{- end }}
+          volumeMounts:
+            - name: {{ .Chart.Name }}-data
+              mountPath: /data
+            - name: etc-localtime-volume
+              mountPath: /etc/localtime
+              readOnly: true
+        {{- if .Values.enableNetAdmin }}
+          securityContext:
+            capabilities:
+              add:
+                - NET_ADMIN
+        {{- end }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      volumes:
+        - name: {{ .Chart.Name }}-data
+        {{- if .Values.persistentVolume.enabled }}
+          persistentVolumeClaim:
+            claimName: {{ if .Values.persistentVolume.existingClaim }}{{ .Values.persistentVolume.existingClaim }}{{- else }}{{ $fullName }}{{- end }}
+        {{- else }}
+          emptyDir: {}
+        {{- end }}
+        - name: etc-localtime-volume
+          hostPath:
+            path: /etc/localtime
+            type: File
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
