@@ -56,7 +56,7 @@ spec:
             - name: OPENVPN_PROVIDER
               value: {{ .Values.config.openvpn_provider | quote }}
             - name: OPENVPN_USERNAME
-              value: {{ .Values.config.openvpn_provider | quote }}
+              value: {{ .Values.config.openvpn_username | quote }}
             - name: OPENVPN_PASSWORD
               value: {{ .Values.config.openvpn_password | quote }}
             - name: WEBPROXY_ENABLED
@@ -79,12 +79,6 @@ spec:
             - name: etc-localtime-volume
               mountPath: /etc/localtime
               readOnly: true
-        {{- if .Values.enableNetAdmin }}
-          securityContext:
-            capabilities:
-              add:
-                - NET_ADMIN
-        {{- end }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       volumes:
