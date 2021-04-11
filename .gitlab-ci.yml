@@ -1,0 +1,36 @@
+# This file is a template, and might need editing before it works on your project.
+# see https://docs.gitlab.com/ee/ci/yaml/README.html for all available options
+
+# you can delete this line if you're not using Docker
+image: registry.ericxliu.me/eric/docker-helm-push:latest
+
+before_script:
+  - echo "Add deployment"
+  - helm repo add ericxliu https://chart.ericxliu.local/ --insecure-skip-tls-verify
+
+after_script:
+  - echo "After script section"
+  - echo "For example you might do some cleanup here"
+
+build1:
+  stage: build
+  script:
+    - helm package transmission
+  artifacts:
+    paths:
+      - "*.tgz"
+
+
+test1:
+  stage: test
+  script:
+    - echo "Do a test here"
+    - echo "For example run a test suite"
+
+deploy1:
+  stage: deploy
+  dependencies: 
+    - build1
+  script:
+    - ls -al $CI_BUILDS_DIR/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/
+    - helm push --insecure --force $CI_BUILDS_DIR/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/*.tgz ericxliu
