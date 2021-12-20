@@ -76,8 +76,6 @@ spec:
             - name: etc-localtime-volume
               mountPath: /etc/localtime
               readOnly: true
-          resources:
-            {{- toYaml .Values.resources | nindent 12 }}
       volumes:
         - name: {{ .Chart.Name }}-data
         {{- if .Values.persistentVolume.enabled }}
