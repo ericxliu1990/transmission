@@ -73,17 +73,21 @@ spec:
           volumeMounts:
             - name: {{ .Chart.Name }}-data
               mountPath: /data
+            - name: {{ .Chart.Name }}-media
+              mountPath: /media
             - name: etc-localtime-volume
               mountPath: /etc/localtime
               readOnly: true
       volumes:
-        - name: {{ .Chart.Name }}-data
+        - name: {{ .Chart.Name }}-media
         {{- if .Values.persistentVolume.enabled }}
           persistentVolumeClaim:
             claimName: {{ if .Values.persistentVolume.existingClaim }}{{ .Values.persistentVolume.existingClaim }}{{- else }}{{ include "transmission.fullname" . }}{{- end }}
         {{- else }}
           emptyDir: {}
         {{- end }}
+        - name: {{ .Chart.Name }}-data
+          emptyDir: {}
         - name: etc-localtime-volume
           hostPath:
             path: /etc/localtime

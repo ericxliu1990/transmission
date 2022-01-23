@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: transmission-media
+spec:
+  capacity:
+    storage: 1Ti
+  accessModes:
+  - ReadWriteOnce
+  nfs:
+    path: /volume2/Media
+    server: diskstation.local
+  mountOptions:
+    - nfsvers=4
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: transmission-media
