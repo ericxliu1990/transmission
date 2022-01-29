@@ -1,9 +1,9 @@
-{{- if and .Values.persistentVolume.enabled (not .Values.persistentVolume.existingClaim) }}
 {{- $fullName := include "transmission.fullname" . -}}
+{{- if and .Values.persistentVolume.enabled (not .Values.persistentVolume.existingClaim) }}
 kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
-  name: {{ $fullName }}
+  name: {{ $fullName }}-data
   labels:
     {{- include "transmission.labels" . | nindent 4 }}
   {{- if .Values.persistentVolume.annotations }}
@@ -24,3 +24,18 @@ spec:
     requests:
       storage: {{ .Values.persistentVolume.size }}
 {{- end }}
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: {{ $fullName }}-media
+  labels:
+    type: transmission-media-data
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: "transmission-media"
+  resources:
+    requests:
+      storage: 1Ti
+
