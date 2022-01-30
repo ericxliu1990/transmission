@@ -66,6 +66,14 @@ spec:
               value: {{ .Values.config.health_check_host | quote }}
             - name: NORDVPN_COUNTRY
               value: {{ .Values.config.nordvpn_country | quote }}
+            - name: TRANSMISSION_HOME
+              value: /media/transmission-home
+            - name: TRANSMISSION_DOWNLOAD_DIR
+              value: /media/completed
+            - name: TRANSMISSION_INCOMPLETE_DIR
+              value: /media/incomplete
+            - name: TRANSMISSION_WATCH_DIR
+              value: /media/watch
           {{- range .Values.env }}
             - name: {{ .name }}
               value: {{ .value }}
