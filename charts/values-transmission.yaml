@@ -1,0 +1,39 @@
+image:
+  repository: haugene/transmission-openvpn
+  tag: latest
+
+securityContext:
+  capabilities:
+    add:
+      - NET_ADMIN
+      - MKNOD
+
+ingress:
+  enabled: true
+  annotations:
+    kubernetes.io/ingress.class: "nginx-internal"
+    cert-manager.io/cluster-issuer: ca-local
+  hosts:
+    - host: bt2.ericxliu.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: bt2-ericxliu-local-ca
+      hosts:
+        - bt2.ericxliu.local
+config:
+  create_tun_device: "true"
+  openvpn_provider: "NORDVPN"
+    #openvpn_username: "liuxue1990@gmail.com"
+    #openvpn_password: "Liuxue1990"
+  openvpn_username: "m4cWrVHGL1oCA6jXczEbYRpZ"
+  openvpn_password: "1EuBi56khiV9HYy5PvPuuU4p"
+  webproxy_enabled: "false"
+  local_network: "10.0.0.0/8,192.168.0.0/16,172.16.0.0/12"
+  transmission_web_ui: "combustion"
+  health_check_host: "google.com"
+  nordvpn_country: "NL"
+
+persistentVolume:
+  enabled: true
